@@ -1,6 +1,6 @@
 use std::{ffi::OsStr, fs, io::Write, path::PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use clap::Parser;
 use dirs::home_dir;
 use markdown_parser::{read_file, Markdown};
@@ -28,17 +28,8 @@ fn main() -> Result<()> {
     let args = Cli::parse();
     let vault_path = args.vault_path;
     let quartz_path = args.quartz_path;
-
-    // if let Some(home_dir) = home_dir() {
-    //     let metadata = home_dir.metadata()?;
-    //     let mut permissions = metadata.permissions();
-    //     permissions.set_readonly(false);
-    // };
     let e = visit_dirs(&vault_path, &quartz_path);
     println!("{:?}", e);
-
-    // println!("quartz");
-    // let _ = visit_dirs(&quartz_path);
 
     Ok(())
 }
@@ -49,16 +40,11 @@ fn visit_dirs(dir: &PathBuf, quartz_path: &PathBuf) -> Result<()> {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {
-                // println!("visiting {:?}", path.clone());
                 if !path.ends_with(".obsidian") && !path.ends_with(".trash") {
                     visit_dirs(&path, quartz_path)?;
                 }
             } else {
                 if path.extension().and_then(OsStr::to_str) == Some("md") {
-                    // parse the markdown
-
-                    // let path = entry.path();
-                    // println!("{:?}", path);
                     let md = read_file(path.clone());
                     match md {
                         Ok(markdown) => {
@@ -84,18 +70,8 @@ fn visit_dirs(dir: &PathBuf, quartz_path: &PathBuf) -> Result<()> {
                                 println!("copied {:?} to {:?}", path, quartz_path);
                             }
                         }
-                        Err(_) => {
-                            // println!("{:?}", e.to_string())
-                        }
+                        Err(_) => {}
                     }
-
-                    // match read_file(entry.path()) {
-                    // Ok(markdown) => {
-                    // let frontmatter = markdown.front_matter();
-                    // println!("{:?}", frontmatter);
-                    // }
-                    // _ => todo!(),
-                    // }
                 }
             }
         }
